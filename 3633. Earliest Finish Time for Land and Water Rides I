@@ -1,1 +1,90 @@
+#include <stdlib.h>
+#include <limits.h>
 
+int *sum(int t1[], int d1[], int m) {
+    int *s1 = malloc(m * sizeof(int));
+    if (s1 == NULL) return NULL;
+    for (int i = 0; i < m; i++) {
+        s1[i] = t1[i] + d1[i];
+    }
+    return s1;
+}
+
+int earliestFinishTime(int* landStartTime, int landStartTimeSize, int* landDuration, int landDurationSize, int* waterStartTime, int waterStartTimeSize, int* waterDuration, int waterDurationSize) {
+    int minvalue = INT_MAX;
+    int n = landDurationSize;
+    int k = waterDurationSize;
+    int count = 0;
+
+    int t1[n];
+    int t2[k];
+    int d1[n];
+    int d2[k];
+
+    int *s1;
+    int *s2;
+
+    for (int i = 0; i < n; i++) {
+        t1[i] = landStartTime[i];
+        d1[i] = landDuration[i];
+    }
+    for (int j = 0; j < k; j++) {
+        t2[j] = waterStartTime[j];
+        d2[j] = waterDuration[j];
+    }
+
+    do {
+        count = 0;
+        for (int i = 0; i < n - 1; i++) {
+            if (t1[i] > t1[i + 1]) {
+                int temp = t1[i + 1];
+                int temp2 = d1[i + 1];
+                t1[i + 1] = t1[i];
+                t1[i] = temp;
+                d1[i + 1] = d1[i];
+                d1[i] = temp2;
+                count++;
+            }
+        }
+    } while (count != 0);
+
+    do {
+        count = 0;
+        for (int i = 0; i < k - 1; i++) {
+            if (t2[i] > t2[i + 1]) {
+                int temp = t2[i + 1];
+                int temp2 = d2[i + 1];
+                t2[i + 1] = t2[i];
+                t2[i] = temp;
+                d2[i + 1] = d2[i];
+                d2[i] = temp2;
+                count++;
+            }
+        }
+    } while (count != 0);
+
+    s1 = sum(t1, d1, n);
+    s2 = sum(t2, d2, k);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < k; j++) {
+            int result = 0;
+            if (s1[i] <= t2[j]) {
+                result = s2[j];
+            } else if (s2[j] <= t1[i]) {
+                result = s1[i];
+            } else if (s1[i] > t2[j] && t2[j] >= t1[i]) {
+                result = s1[i] + d2[j];
+            } else if (s2[j] > t1[i] && t2[j] <= t1[i]) {
+                result = s2[j] + d1[i];
+            }
+            if (result < minvalue && result != 0) {
+                minvalue = result;
+            }
+        }
+    }
+
+    free(s1);
+    free(s2);
+    return minvalue;
+}
